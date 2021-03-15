@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -x
+
+    #--enable-cxx 
+    #LIBS="-lsz -lz -lm -ldl"
+${PROJECT_SOURCE_DIR}/hdf5/configure \
+    CC=${MPI_C_COMPILER} \
+    CXX=${MPI_CXX_COMPILER} \
+    --prefix=${CMAKE_INSTALL_PREFIX} \
+    --libdir=${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR} \
+    --enable-shared \
+    --enable-static \
+    --disable-sharedlib-rpath \
+    --enable-build-mode=production \
+    --enable-hl \
+    --enable-parallel \
+    --enable-fortran \
+    --enable-profiling=yes \
+    --enable-unsupported \
+    --enable-cxx \
+    --with-pic \
+    --with-zlib=${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR} \
+    --with-szlib=${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR} 

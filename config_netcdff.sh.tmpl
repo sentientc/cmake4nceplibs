@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -x
+
+    #--disable-shared \
+${PROJECT_SOURCE_DIR}/netcdf-fortran/configure \
+    FC=${MPI_Fortran_COMPILER} \
+    F77=${MPI_Fortran_COMPILER} \
+    CC=${MPI_C_COMPILER} \
+    --prefix=${CMAKE_INSTALL_PREFIX} \
+    --libdir=${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR} \
+    CPPFLAGS="-I${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}" \
+    FFLAGS="${NETCDF_FORTRAN_FLAGS}" \
+    FCFLAGS="${NETCDF_FORTRAN_FLAGS}" \
+    LDFLAGS="-L${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}" \
+    --enable-shared \
+    --enable-static \
+    --host=x86_64-redhat-linux-gnu \
+    LIBS="-lnetcdf -lhdf5_hl -lhdf5 -lsz -lz -lm -ldl"

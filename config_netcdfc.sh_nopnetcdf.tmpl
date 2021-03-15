@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -x
+
+${PROJECT_SOURCE_DIR}/netcdf-c/configure \
+    --disable-dap\
+    CC=${MPI_C_COMPILER} \
+    CXX=${MPI_CXX_COMPILER} \
+    --prefix=${CMAKE_INSTALL_PREFIX} \
+    --libdir=${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR} \
+    --enable-parallel4 \
+    --host=x86_64-redhat-linux-gnu \
+    CPPFLAGS="-I${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}" \
+    LDFLAGS="-L${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}" \
+    LIBS="-lhdf5_hl -lhdf5 -lsz -lz -lm -ldl -lbsd"

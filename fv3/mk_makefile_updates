@@ -1,0 +1,75 @@
+#!/bin/csh 
+
+set root = $PWD
+
+mkdir -p ${root}/exec
+
+if (${3} == "clean" ) then
+ echo "cleaning build directory in 2 seconds"
+ sleep 2
+ \rm -rf exec/*
+endif
+
+cd ${root}/exec/
+
+# GFS CPPDEFS
+ set GFS_cppDefs = "-DNEW_TAUCTMAX -DNEMS_GSM -DINTERNAL_FILE_NML"
+
+# non-hydrostatic CPPDEFS
+ set cppDefs = "-Duse_libMPI -Duse_netCDF -DSPMD -DUSE_LOG_DIAG_FIELD_INFO -Duse_LARGEFILE -DMOIST_CAPPA -DUSE_COND -DUSE_GFSL63 -DGFS_PHYS -DNO_CMIP_DIAG -DINTERNAL_FILE_NML"
+
+# hydrostatic CPPDEFS
+if (${1} == "hydro") then
+ set cppDefs = "-Duse_libMPI -Duse_netCDF -DSPMD -DUSE_LOG_DIAG_FIELD_INFO -Duse_LARGEFILE -DUSE_GFSL63 -DGFS_PHYS -DNO_CMIP_DIAG -DINTERNAL_FILE_NML"
+endif
+
+set overload = ""
+if (${2} == "32bit") then
+ set overload = "-DOVERLOAD_R4 "
+endif
+
+
+############################
+#---CREATE MAKEFILES
+############################
+../../../site/mkmf -m Makefile_gfs -a ${FV3_GFS_SRC} -t "${TEMPLATE}" -o "-cpp" -c "$GFS_cppDefs" -p libgfs.a $updates ./pathnames_gfs
+
+../../../site/mkmf -m Makefile_fms -a ${FV3_GFS_SRC} -t "${TEMPLATE}" -c "$cppDefs $overload" -p libfms.a $updates ./pathnames_fms
+
+../../../site/mkmf -m Makefile_fv3 -a ${FV3_GFS_SRC} -t "${TEMPLATE}" -c "$cppDefs" -o "-I${FV3_GFS_SRC}/shared/include" -p test.x $updates ./pathnames_fv3
+
+############################
+#---ADD LIBS TO FINAL LINK
+############################
+sed 's/LDFLAGS/NCEPLIBS) $(LDFLAGS/g' < Makefile_fv3 > OUT
+mv -f OUT Makefile_fv3
+
+############################
+#---COMPILE -O0 (for speed)
+#---GFS_diagnostics.F90
+############################
+sed 's"$(FC) $(CPPDEFS) $(CPPFLAGS) $(FPPFLAGS) $(FFLAGS) $(OTHERFLAGS) $(OTHER_FFLAGS) -c\t$(SRCROOT)fv3_gfsphysics/GFS_layer/GFS_diagnostics.F90" $(FC) $(CPPDEFS) $(CPPFLAGS) $(FPPFLAGS) $(FFLAGS) $(OTHERFLAGS) $(OTHER_FFLAGS) -O0 -c\t$(SRCROOT)fv3_gfsphysics/GFS_layer/GFS_diagnostics.F90" ' < Makefile_gfs > OUT
+mv -f OUT Makefile_gfs
+
+############################
+#---COMPILE -xCORE-AVX-I
+#---radiation_aerosols.f
+############################
+sed 's"$(FC) $(FFLAGS) $(OTHERFLAGS) $(OTHER_FFLAGS) -c\t$(SRCROOT)fv3_gfsphysics/gsmphys/radiation_aerosols.f"$(FC) $(FFLAGS) $(OTHERFLAGS) $(OTHER_FFLAGS) -xCORE-AVX-I -c\t$(SRCROOT)fv3_gfsphysics/gsmphys/radiation_aerosols.f"' < Makefile_gfs > OUT
+mv -f OUT Makefile_gfs
+
+############################
+#---ADD FAST TRANSCENDENTALS
+#---model/nh_utils.F90
+#---model/fv_mapz.F90
+############################
+sed 's"$(FC) $(CPPDEFS) $(CPPFLAGS) $(FPPFLAGS) $(FFLAGS) $(OTHERFLAGS) $(OTHER_FFLAGS) -c\t$(SRCROOT)atmos_cubed_sphere/model/nh_utils.F90"$(FC) $(CPPDEFS) $(CPPFLAGS) $(FPPFLAGS) $(FFLAGS) $(OTHERFLAGS) $(OTHER_FFLAGS) $(FAST) -c\t$(SRCROOT)atmos_cubed_sphere/model/nh_utils.F90"' < Makefile_fv3 > OUT
+mv -f OUT Makefile_fv3
+
+sed 's"$(FC) $(CPPDEFS) $(CPPFLAGS) $(FPPFLAGS) $(FFLAGS) $(OTHERFLAGS) $(OTHER_FFLAGS) -c\t$(SRCROOT)atmos_cubed_sphere/model/fv_mapz.F90"$(FC) $(CPPDEFS) $(CPPFLAGS) $(FPPFLAGS) $(FFLAGS) $(OTHERFLAGS) $(OTHER_FFLAGS) $(FAST) -c\t$(SRCROOT)atmos_cubed_sphere/model/fv_mapz.F90"' < Makefile_fv3 > OUT
+mv -f OUT Makefile_fv3
+
+############################
+
+exit
+

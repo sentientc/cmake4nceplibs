@@ -1,0 +1,31 @@
+#!/bin/tcsh
+set pwd = `pwd`
+setenv FV3_GFS_SRC $pwd:h:h:h/FV3GFS_SRC/
+setenv updates $pwd:h:h:h/updates_sst
+set exed = $pwd/bin
+source ../../site/env.cshrc
+mkdir -p $exed
+
+## make non-hydrostatic prod 64bit
+#  set type = "nh"
+#  set comp = "prod"
+#  set bit  = "64bit"
+#  set avx  = "Y"
+#  echo "  building ${type} ${comp} ${bit} \t `date`"
+#    ./mk_paths ${bit}                         > & build_${type}_${comp}.${bit}.out
+#    ./mk_makefile ${type} ${bit} clean       >> & build_${type}_${comp}.${bit}.out
+#    ./mk_make ${comp} ${bit} ${avx} clean    >> & build_${type}_${comp}.${bit}.out
+#    mv exec/test.x bin/fv3_gfs_${type}.${comp}.${bit}.x
+
+
+# make non-hydrostatic prod 32bit
+  set type = "nh"
+  set comp = "prod"
+  set bit  = "64bit"
+  set avx  = "Y"
+  echo "  building ${type} ${comp} ${bit} \t `date`"
+    ./mk_paths ${bit}                         > & build_${type}_${comp}.${bit}_sst.out
+    ./mk_makefile_updates ${type} ${bit} clean       >> & build_${type}_${comp}.${bit}_sst.out
+    ./mk_make ${comp} ${bit} ${avx} clean    >> & build_${type}_${comp}.${bit}_sst.out
+    mv -f exec/test.x $exed/fv3_gfs_${type}.${comp}.${bit}.x
+

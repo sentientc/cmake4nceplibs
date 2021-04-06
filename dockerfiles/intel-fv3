@@ -1,0 +1,14 @@
+ FROM intel/oneapi-hpckit:devel-centos8
+ RUN dnf groupinstall 'Development Tools'
+ RUN dnf install git wget tcsh glibc
+ RUN wget https://download-ib01.fedoraproject.org/pub/epel/8/Everything/x86_64/Packages/l/libbsd-0.9.1-4.el8.x86_64.rpm
+ RUN dnf install libbsd-0.9.1-4.el8.x86_64.rpm
+ RUN git clone --recursive https://github.com/NOAA-EMC/NCEPLIBS-external.git
+ RUN git clone --recursive https://github.com/NOAA-EMC/NCEPLIBS.git
+ RUN git clone https://github.com/sentientc/cmake4nceplibs.git
+ RUN cd /NCEPLIBS-external;git clone https://github.com/Parallel-NetCDF/PnetCDF.git;cd /NCEPLIBS-external/PnetCDF;autoreconf -vfi
+ RUN cd /NCEPLIBS-external/cmake-src;cp /cmake4nceplibs/runcompile.sh .;./runcompile.sh
+ RUN cd /NCEPLIBS-external;cp /cmake4nceplibs/config* .;cp /cmake4nceplibs/CMakeLists* .;cp /cmake4nceplibs/runcompile_shared.sh .;./runcompile_shared.sh
+ RUN cd /NCEPLIBS;cp /cmake4nceplibs/nceplibs/runc* .;./runcompile.sh
+ ADD fv3 /
+ RUN chown root:root -R fv3

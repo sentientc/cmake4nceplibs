@@ -1,4 +1,6 @@
 #!/bin/bash
+#cannot make cmake work properly so here is some compromise
+prt=${1:-1}
 export MPICHLIB_CFLAGS="${CFLAGS}";      unset CFLAGS
 export MPICHLIB_CXXFLAGS="${CXXFLAGS}";  unset CXXFLAGS
 export MPICHLIB_CPPFLAGS="${CPPFLAGS}";  unset CPPFLAGS
@@ -33,32 +35,32 @@ rm -rf build/*
 cp -f config_netcdfc.sh_nopnetcdf.tmpl config_netcdfc.sh.tmpl
 cp -f CMakeLists_nopnetcdf.txt CMakeLists.txt
 cd build
-if [ 1 -eq 2 ];then
+if [ $prt -eq 1 ];then
 cmake .. -DCMAKE_INSTALL_PREFIX=${td}/${tv} -DCMAKE_INSTALL_LIBDIR=lib \
  -DCMAKE_INSTALL_INCLUDEDIR=include -DBUILD_MPI=OFF -DDEPLOY=ON \
  -DBUILD_NETCDF=ON -DBUILD_JASPER=ON -DBUILD_PNG=ON -DBUILD_WGRIB2=OFF \
  -DBUILD_ESMF=OFF -DBUILD_HDF5=ON -DBUILD_PNETCDF=ON
 make
 fi
-if [ 1 -eq 2 ];then
+if [ $prt -eq 2 ];then
 cmake .. -DCMAKE_INSTALL_PREFIX=${td}/${tv} -DCMAKE_INSTALL_LIBDIR=lib \
  -DCMAKE_INSTALL_INCLUDEDIR=include -DBUILD_MPI=OFF -DDEPLOY=ON \
  -DBUILD_NETCDF=OFF -DBUILD_JASPER=OFF -DBUILD_PNG=OFF -DBUILD_WGRIB2=OFF \
  -DBUILD_ESMF=OFF -DBUILD_HDF5=OFF -DBUILD_PNETCDF=ON
 make
 fi
-if [ 1 -eq 1 ];then
-cmake .. -DCMAKE_INSTALL_PREFIX=${td}/${tv} -DCMAKE_INSTALL_LIBDIR=lib \
- -DCMAKE_INSTALL_INCLUDEDIR=include -DBUILD_MPI=OFF -DDEPLOY=ON \
- -DBUILD_NETCDF=OFF -DBUILD_JASPER=OFF -DBUILD_PNG=OFF -DBUILD_WGRIB2=ON \
- -DBUILD_ESMF=ON -DBUILD_HDF5=OFF -DBUILD_PNETCDF=OFF
-make
-fi
-if [ 1 -eq 2 ];then
+if [ $prt -eq 3 ];then
 cp -f ../config_netcdfc.sh_pnetcdf.tmpl ../config_netcdfc.sh.tmpl
 cmake .. -DCMAKE_INSTALL_PREFIX=${td}/${tv} -DCMAKE_INSTALL_LIBDIR=lib \
  -DCMAKE_INSTALL_INCLUDEDIR=include -DBUILD_MPI=OFF -DDEPLOY=ON \
  -DBUILD_NETCDF=ON -DBUILD_JASPER=ON -DBUILD_PNG=ON -DBUILD_WGRIB2=OFF \
  -DBUILD_ESMF=OFF -DBUILD_HDF5=OFF -DBUILD_PNETCDF=OFF
+make
+fi
+if [ $prt -eq 4 ];then
+cmake .. -DCMAKE_INSTALL_PREFIX=${td}/${tv} -DCMAKE_INSTALL_LIBDIR=lib \
+ -DCMAKE_INSTALL_INCLUDEDIR=include -DBUILD_MPI=OFF -DDEPLOY=ON \
+ -DBUILD_NETCDF=OFF -DBUILD_JASPER=OFF -DBUILD_PNG=OFF -DBUILD_WGRIB2=ON \
+ -DBUILD_ESMF=ON -DBUILD_HDF5=OFF -DBUILD_PNETCDF=OFF
 make
 fi
